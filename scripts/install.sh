@@ -46,6 +46,13 @@ else
     echo "[INSTALL] User desktop entry and launcher installed successfully!"
 fi
 
+# Auto-restore Antigravity chat session if backup exists
+if [ -f "${ROOT_DIR}/sync_chat.sh" ] && [ -f "${ROOT_DIR}/.antigravity_chat_backup.tar.gz" ]; then
+    "${ROOT_DIR}/sync_chat.sh" --restore >/dev/null 2>&1 || true
+    echo "[INSTALL] Antigravity chat session restored for this machine!"
+fi
+
+
 echo "=========================================================="
 echo "  Installation Complete!"
 echo "  You can now launch Mantis Mobile Forensics:"

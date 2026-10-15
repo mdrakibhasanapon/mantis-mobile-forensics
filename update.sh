@@ -201,6 +201,16 @@ else
     echo -e "${AMBER}  -> Desktop integration preserved (launcher in scripts/mantis-forensics).${NC}"
 fi
 
+# Auto-restore Antigravity chat if backup exists and chat not yet on this laptop
+if [ -f "${ROOT_DIR}/sync_chat.sh" ] && [ -f "${ROOT_DIR}/.antigravity_chat_backup.tar.gz" ]; then
+    if [ ! -d "${HOME}/.gemini/antigravity/brain/eca3c3cd-3686-46e2-8757-83d836fc4999" ]; then
+        echo -e "${BLUE}[SYNC]${NC} Restoring Antigravity chat session from repository..."
+        "${ROOT_DIR}/sync_chat.sh" --restore >/dev/null 2>&1 || true
+        echo -e "${GREEN}  -> Antigravity chat session restored successfully!${NC}"
+    fi
+fi
+
+
 
 # ------------------------------------------------------------------------------
 # 5. Forensic Test Suite Verification
