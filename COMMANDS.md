@@ -34,14 +34,12 @@ git add .
 # 3. Create your initial commit
 git commit -m "feat: Mantis Mobile Forensics with Human-Readable Database Inspector and Auto-Updater"
 
-# 4. Rename default branch to main
-git branch -M main
+# 1. Check your remote URL (already pre-configured for your username):
+git remote -v
+# origin  https://github.com/mdrakibhasanapon/mantis-mobile-forensics.git (fetch)
+# origin  https://github.com/mdrakibhasanapon/mantis-mobile-forensics.git (push)
 
-# 5. Connect to your GitHub repository (replace with your repo URL)
-# Example: https://github.com/your-username/mantis-mobile-forensics.git
-git remote add origin https://github.com/<YOUR-GITHUB-USERNAME>/<YOUR-REPO-NAME>.git
-
-# 6. Push code to GitHub
+# 2. Push code to your GitHub:
 git push -u origin main
 ```
 
@@ -59,10 +57,10 @@ Open the terminal on your second laptop and run:
 
 ```bash
 # Clone your repository
-git clone https://github.com/<YOUR-GITHUB-USERNAME>/<YOUR-REPO-NAME>.git
+git clone https://github.com/mdrakibhasanapon/mantis-mobile-forensics.git
 
 # Navigate into the project folder
-cd <YOUR-REPO-NAME>
+cd mantis-mobile-forensics
 
 # Run initial setup and desktop integration
 ./install.sh
