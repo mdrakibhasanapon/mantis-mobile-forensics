@@ -1,0 +1,15 @@
+# Kali Linux System Dependencies for Mantis Mobile Forensics
+# Install via: sudo apt update && sudo apt install -y $(grep -v '^#' requirements-system.txt)
+
+python3
+python3-pip
+python3-fastapi
+python3-uvicorn
+python3-pydantic
+python3-pytest
+sqlite3
+adb
+yara
+libimobiledevice-utils
+nodejs
+npm

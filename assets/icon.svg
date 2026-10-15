@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7" />
+      <stop offset="50%" stop-color="#0369a1" />
+      <stop offset="100%" stop-color="#0c4a6e" />
+    </linearGradient>
+    <linearGradient id="mantisGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#34d399" />
+    </linearGradient>
+    <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Background Shield Badge -->
+  <path d="M128 16 L220 54 L220 126 C220 188 180 232 128 248 C76 232 36 188 36 126 L36 54 Z"
+        fill="url(#shieldGrad)" stroke="#38bdf8" stroke-width="6" stroke-linejoin="round" />
+
+  <!-- Inner Dark Core -->
+  <path d="M128 32 L204 64 L204 124 C204 176 170 214 128 228 C86 214 52 176 52 124 L52 64 Z"
+        fill="#090d14" opacity="0.92" />
+
+  <!-- Cyber Circuit Trace Overlay -->
+  <path d="M72 80 L96 80 L112 96 L112 144 L96 160 L72 160"
+        stroke="#0284c7" stroke-width="3" fill="none" opacity="0.6" />
+  <circle cx="72" cy="80" r="4" fill="#38bdf8" />
+  <circle cx="72" cy="160" r="4" fill="#38bdf8" />
+
+  <path d="M184 80 L160 80 L144 96 L144 144 L160 160 L184 160"
+        stroke="#0284c7" stroke-width="3" fill="none" opacity="0.6" />
+  <circle cx="184" cy="80" r="4" fill="#38bdf8" />
+  <circle cx="184" cy="160" r="4" fill="#38bdf8" />
+
+  <!-- Mantis Head & Scythes Symbol -->
+  <g filter="url(#neonGlow)">
+    <!-- Mantis Scythe Arms -->
+    <path d="M76 100 Q90 56 128 72 Q96 76 96 124 Q96 150 114 168 Q88 150 76 100 Z" fill="url(#mantisGrad)" />
+    <path d="M180 100 Q166 56 128 72 Q160 76 160 124 Q160 150 142 168 Q168 150 180 100 Z" fill="url(#mantisGrad)" />
+
+    <!-- Mantis Head Triangle -->
+    <polygon points="128,88 110,126 146,126" fill="#38bdf8" stroke="#f0fdf4" stroke-width="2" />
+    <!-- Eyes -->
+    <ellipse cx="112" cy="108" rx="5" ry="8" fill="#10b981" />
+    <ellipse cx="144" cy="108" rx="5" ry="8" fill="#10b981" />
+    <!-- Antennae -->
+    <line x1="120" y1="92" x2="102" y2="60" stroke="#34d399" stroke-width="3" stroke-linecap="round" />
+    <line x1="136" y1="92" x2="154" y2="60" stroke="#34d399" stroke-width="3" stroke-linecap="round" />
+    <!-- Mobile Digital Grid Node -->
+    <rect x="116" y="146" width="24" height="38" rx="4" fill="#0369a1" stroke="#38bdf8" stroke-width="2" />
+    <circle cx="128" cy="174" r="2.5" fill="#34d399" />
+  </g>
+</svg>

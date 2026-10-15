@@ -1,0 +1,104 @@
+"""Forensic correlation, recovery, triage, and SQLite explorer routes."""
+from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel
+from pathlib import Path
+from typing import List, Optional, Dict, Any
+
+from ..dependencies import case_manager, verify_session_token_dep
+from mmf_core.models import CorrelationLink, TriageFinding, RecoveredItem
+from mmf_core.parsers.sqlite.explorer import SqliteForensicExplorer
+
+router = APIRouter(prefix="/forensics", tags=["Forensics"], dependencies=[Depends(verify_session_token_dep)])
+
+class SqliteQueryRequest(BaseModel):
+    case_id: str
+    relative_db_path: str
+    query: str
+    limit: int = 100
+    offset: int = 0
+
+@router.get("/correlations", response_model=List[CorrelationLink])
+def get_correlations(case_id: str):
+    return case_manager.list_correlations(case_id)
+
+@router.get("/triage", response_model=List[TriageFinding])
+def get_triage_findings(case_id: str):
+    return case_manager.list_triage_findings(case_id)
+
+@router.get("/recovered", response_model=List[RecoveredItem])
+def get_recovered_items(case_id: str):
+    return case_manager.list_recovered_items(case_id)
+
+@router.get("/sqlite/databases")
+def list_sqlite_databases(case_id: str):
+    case = case_manager.get_case(case_id)
+    if not case:
+        raise HTTPException(status_code=404, detail="Case not found")
+    
+    working_dir = Path(case.storage_path) / "working"
+    databases = []
+    if working_dir.exists():
+        for f in working_dir.rglob("*"):
+            if f.is_file() and SqliteForensicExplorer.is_sqlite_database(f):
+                try:
+                    header = SqliteForensicExplorer.get_database_header(f)
+                    databases.append({
+                        "name": f.name,
+                        "relative_path": str(f.relative_to(working_dir)),
+                        "file_size": f.stat().st_size,
+                        "header": header
+                    })
+                except Exception:
+                    continue
+    return databases
+
+@router.get("/sqlite/schema")
+def get_sqlite_schema(case_id: str, relative_db_path: str = Query(...)):
+    case = case_manager.get_case(case_id)
+    if not case:
+        raise HTTPException(status_code=404, detail="Case not found")
+
+    full_path = (Path(case.storage_path) / "working" / relative_db_path).resolve()
+    base_dir = (Path(case.storage_path) / "working").resolve()
+    if not full_path.is_relative_to(base_dir) or not full_path.is_file():
+        raise HTTPException(status_code=400, detail="Invalid database path")
+
+    schema = SqliteForensicExplorer.get_schema(full_path)
+    header = SqliteForensicExplorer.get_database_header(full_path)
+    return {"schema": schema, "header": header}
+
+@router.post("/sqlite/query")
+def execute_sqlite_query(req: SqliteQueryRequest):
+    case = case_manager.get_case(req.case_id)
+    if not case:
+        raise HTTPException(status_code=404, detail="Case not found")
+
+    full_path = (Path(case.storage_path) / "working" / req.relative_db_path).resolve()
+    base_dir = (Path(case.storage_path) / "working").resolve()
+    if not full_path.is_relative_to(base_dir) or not full_path.is_file():
+        raise HTTPException(status_code=400, detail="Invalid database path")
+
+    try:
+        result = SqliteForensicExplorer.execute_read_query(full_path, req.query, limit=req.limit, offset=req.offset)
+        return result
+    except PermissionError as pe:
+        raise HTTPException(status_code=403, detail=str(pe))
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.get("/sqlite/freelist")
+def get_sqlite_freelist(case_id: str, relative_db_path: str = Query(...)):
+    case = case_manager.get_case(case_id)
+    if not case:
+        raise HTTPException(status_code=404, detail="Case not found")
+
+    full_path = (Path(case.storage_path) / "working" / relative_db_path).resolve()
+    base_dir = (Path(case.storage_path) / "working").resolve()
+    if not full_path.is_relative_to(base_dir) or not full_path.is_file():
+        raise HTTPException(status_code=400, detail="Invalid database path")
+
+    try:
+        strings = SqliteForensicExplorer.carve_freelist_strings(full_path)
+        return {"carved_strings": strings, "count": len(strings)}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))

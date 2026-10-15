@@ -1,0 +1,8 @@
+{
+  "name": "mantis-mobile-forensics-desktop",
+  "version": "1.0.0",
+  "description": "Professional Mobile Digital Forensics Desktop Workstation for Kali Linux",
+  "main": "main.js",
+  "author": "Mantis Mobile Forensics DFIR Team",
+  "license": "Apache-2.0"
+}

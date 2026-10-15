@@ -1,0 +1,22 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Mantis Mobile Forensics
+GenericName=Mobile Digital Forensics Platform
+Comment=Professional Cross-Platform Mobile Digital Forensics Workstation for Kali Linux
+Exec=mantis-forensics %U
+Icon=mantis
+Terminal=false
+Categories=Forensics;Security;Utility;X-Kali;
+Keywords=forensics;mobile;android;ios;dfir;evidence;sqlite;adb;
+StartupNotify=true
+StartupWMClass=mantis-mobile-forensics-desktop
+Actions=QuickSynthetic;NewCase;
+
+[Desktop Action QuickSynthetic]
+Name=Launch with Synthetic Extraction
+Exec=mantis-forensics --demo
+
+[Desktop Action NewCase]
+Name=Start New Case
+Exec=mantis-forensics --new-case

@@ -1,0 +1,120 @@
+#!/usr/bin/env bash
+# Mantis Mobile Forensics - Main Application Launcher
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+# Resolve installation directory if installed in /opt
+if [ -d "/opt/mantis-mobile-forensics" ]; then
+    APP_DIR="/opt/mantis-mobile-forensics"
+else
+    APP_DIR="${ROOT_DIR}"
+fi
+
+export PYTHONPATH="${APP_DIR}/packages/mmf_core/src:${APP_DIR}/apps/api/src:${PYTHONPATH:-}"
+
+# Configurable data directory: default to ~/.local/share/mantis-forensics
+DEFAULT_DATA_DIR="${HOME}/.local/share/mantis-forensics"
+DATA_DIR="${MMF_DATA_DIR:-${DEFAULT_DATA_DIR}}"
+
+print_help() {
+    cat << EOF
+Mantis Mobile Forensics (MMF) - Linux Desktop Workstation v1.0.0
+
+Usage: mantis-forensics [OPTIONS]
+
+Options:
+  --demo                 Launch application and auto-generate synthetic mobile extraction dataset
+  --data-dir PATH        Specify custom evidence vault and case storage directory
+                         (Default: ~/.local/share/mantis-forensics)
+  --port PORT            Set local loopback API port (Default: 8765)
+  --headless-api         Run the forensic backend API server without desktop graphical window
+  --test                 Execute full automated forensic test suite
+  --version              Display version and system diagnostics
+  --help                 Show this help message
+
+Offline Forensics:
+  All acquisition, parsing, SQLite carving, correlation, and report generation
+  capabilities are 100% self-contained and execute without external network telemetry.
+
+EOF
+}
+
+PORT="8765"
+HEADLESS="false"
+RUN_TESTS="false"
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --help|-h)
+            print_help
+            exit 0
+            ;;
+        --version|-v)
+            echo "Mantis Mobile Forensics v1.0.0 (Kali Linux x86_64 Edition)"
+            exit 0
+            ;;
+        --demo)
+            export MMF_AUTO_DEMO="true"
+            shift
+            ;;
+        --data-dir)
+            DATA_DIR="$2"
+            shift 2
+            ;;
+        --port)
+            PORT="$2"
+            shift 2
+            ;;
+        --headless-api)
+            HEADLESS="true"
+            shift
+            ;;
+        --test)
+            RUN_TESTS="true"
+            shift
+            ;;
+        *)
+            echo "Unknown option: $1"
+            print_help
+            exit 1
+            ;;
+    esac
+done
+
+if [ "${RUN_TESTS}" = "true" ]; then
+    exec "${APP_DIR}/scripts/test.sh"
+fi
+
+if ! mkdir -p "${DATA_DIR}" 2>/dev/null; then
+    DATA_DIR="${ROOT_DIR}/data"
+    mkdir -p "${DATA_DIR}"
+fi
+
+export MMF_DATA_DIR="${DATA_DIR}"
+export MMF_PORT="${PORT}"
+
+if [ "${HEADLESS}" = "true" ]; then
+    echo "[MANTIS] Starting Headless Forensic Engine API on 127.0.0.1:${PORT}..."
+    exec python3 -m mmf_api.main --host 127.0.0.1 --port "${PORT}" --data-dir "${DATA_DIR}"
+fi
+
+# Locate Electron binary
+ELECTRON_BIN=""
+if [ -x "${APP_DIR}/electron_bin/dist/electron" ]; then
+    ELECTRON_BIN="${APP_DIR}/electron_bin/dist/electron"
+elif [ -x "/home/kali/.gemini/antigravity/scratch/electron_bin/dist/electron" ]; then
+    ELECTRON_BIN="/home/kali/.gemini/antigravity/scratch/electron_bin/dist/electron"
+elif which electron >/dev/null 2>&1; then
+    ELECTRON_BIN="$(which electron)"
+fi
+
+if [ -z "${ELECTRON_BIN}" ]; then
+    echo "[MANTIS] Electron binary not found. Launching in headless API mode..."
+    exec python3 -m mmf_api.main --host 127.0.0.1 --port "${PORT}" --data-dir "${DATA_DIR}"
+fi
+
+echo "[MANTIS] Launching Desktop Workstation with Electron..."
+# Chromium/Electron in container/sandbox environments requires --no-sandbox
+exec "${ELECTRON_BIN}" --no-sandbox "${APP_DIR}/apps/desktop" "$@"

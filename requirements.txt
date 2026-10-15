@@ -1,0 +1,6 @@
+# Mantis Mobile Forensics - Python Requirements
+fastapi>=0.100.0
+uvicorn[standard]>=0.22.0
+pydantic>=2.0.0
+pytest>=7.0.0
+anyio>=3.7.0
