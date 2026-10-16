@@ -77,22 +77,37 @@ mantis-mobile-forensics/
 
 ---
 
-## Installation on Kali Linux x86_64
+## Quick Start & Installation
 
-### 1. Build and Install Distributable `.deb` Package
+Clone the repository and run the automated setup script:
+
+```bash
+git clone https://github.com/mdrakibhasanapon/mantis-mobile-forensics.git
+cd mantis-mobile-forensics
+./setup.sh
+```
+
+### What `./setup.sh` Does Automatically:
+1. **Installs System Packages**: Checks and ensures `python3`, `pip3`, `nodejs`, `npm`, `curl`, and `adb` are present.
+2. **Installs Python Dependencies**: Installs `fastapi`, `uvicorn`, `pydantic`, `pytest`, and forensic modules from `requirements.txt`.
+3. **Installs Web Packages & Builds UI**: Runs `npm install` and compiles the React/Tailwind production bundle (`apps/web/dist`).
+4. **Bundles Electron Desktop Runtime**: Configures the standalone Electron workstation runtime for offline execution.
+5. **Registers Desktop & Application Menu Icons**:
+   - **Desktop Screen**: Double-clickable shortcut created directly on your desktop (`~/Desktop/mantis-mobile-forensics.desktop`).
+   - **Application Menu**: Registered in Kali Linux menu (`Forensics` and `Security` categories).
+   - **Terminal Launcher**: Global command `mantis-forensics` symlinked in `~/.local/bin/`.
+6. **Rebuilds Caches**: Updates the GTK icon theme cache and desktop database for instant rendering with the custom Mantis logo.
+
+---
+
+### Alternative: Build Debian (`.deb`) Package
 
 ```bash
 # Build the .deb package
 ./scripts/build_deb.sh
 
-# Install system-wide (requires root/sudo)
+# Install system-wide via dpkg (requires root/sudo)
 sudo dpkg -i mantis-mobile-forensics_1.0.0_amd64.deb
-```
-
-### 2. User-Level Installation (No Root Required)
-
-```bash
-./scripts/install.sh
 ```
 
 ---

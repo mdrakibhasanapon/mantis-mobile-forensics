@@ -8,6 +8,7 @@ This guide explains how to upload this project to your GitHub, synchronize chang
 
 | Task | Command |
 | :--- | :--- |
+| **One-Shot Setup (New Laptop)** | `./setup.sh` |
 | **Auto-Update from GitHub** | `./update.sh` |
 | **Check Updates (Dry-Run)** | `./update.sh --check-only` |
 | **Launch in Development Mode** | `./dev.sh` |
@@ -62,8 +63,8 @@ git clone https://github.com/mdrakibhasanapon/mantis-mobile-forensics.git
 # Navigate into the project folder
 cd mantis-mobile-forensics
 
-# Run initial setup and desktop integration
-./install.sh
+# Run one-shot setup (installs all dependencies, builds UI, adds desktop & menu icons)
+./setup.sh
 ```
 
 ### Step 2: Open in Antigravity
