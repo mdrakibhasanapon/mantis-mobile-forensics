@@ -27,6 +27,8 @@ from mmf_core.parsers.apps.imo import ImoParser
 from mmf_core.parsers.apps.instagram import InstagramDirectParser
 from mmf_core.parsers.apps.discord import DiscordParser
 from mmf_core.parsers.android.clipboard import AndroidDictionaryParser
+from mmf_core.parsers.android.downloads import AndroidDownloadsParser
+from mmf_core.parsers.android.notifications import AndroidNotificationsParser
 from mmf_core.acquisition.android.adb import AndroidAdbAdapter
 from mmf_core.security.protection import validate_session_token
 
@@ -44,6 +46,8 @@ parser_registry.register(AndroidWifiParser())
 parser_registry.register(AndroidBluetoothParser())
 parser_registry.register(AndroidPackagesParser())
 parser_registry.register(AndroidDictionaryParser())
+parser_registry.register(AndroidDownloadsParser())
+parser_registry.register(AndroidNotificationsParser())
 parser_registry.register(WhatsAppParser())
 parser_registry.register(TelegramParser())
 parser_registry.register(SignalParser())

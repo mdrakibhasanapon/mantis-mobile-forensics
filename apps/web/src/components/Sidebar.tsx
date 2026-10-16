@@ -18,6 +18,7 @@ import {
   History,
   Settings,
   MapPin,
+  Bell,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -34,6 +35,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab, activ
     { id: 'acquisition', label: 'Acquisition & Import', icon: DownloadCloud },
     { id: 'evidence', label: 'Evidence Explorer', icon: FolderArchive },
     { id: 'artifacts', label: 'Artefact Analysis', icon: Layers },
+    { id: 'activity', label: 'Device Activity (Notifs, Downloads, Apps)', icon: Bell },
     { id: 'apps', label: 'Application Parsers', icon: MessageSquare },
     { id: 'sqlite', label: 'SQLite Forensic Explorer', icon: Database },
     { id: 'timeline', label: 'Unified Timeline', icon: Clock },

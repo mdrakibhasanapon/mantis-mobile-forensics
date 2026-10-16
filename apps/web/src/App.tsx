@@ -20,6 +20,7 @@ import { ReportsPage } from './pages/ReportsPage';
 import { AuditLogPage } from './pages/AuditLogPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { GeoMapPage } from './pages/GeoMapPage';
+import { DeviceActivityPage } from './pages/DeviceActivityPage';
 
 export const App: React.FC = () => {
   const [currentTab, setCurrentTab] = useState<string>('dashboard');
@@ -173,6 +174,10 @@ export const App: React.FC = () => {
 
           {currentTab === 'artifacts' && (
             <ArtifactsPage caseId={activeCase?.id || ''} initialCategory="all" />
+          )}
+
+          {currentTab === 'activity' && (
+            <DeviceActivityPage activeCase={activeCase} />
           )}
 
           {currentTab === 'apps' && (

@@ -490,4 +490,57 @@ def test_communication_link_analysis():
     assert any(n["id"] == "+15551234567" for n in graph["nodes"])
     assert "whatsapp" in graph["metrics"]["channel_distribution"]
 
+def test_android_downloads_parser():
+    from mmf_core.parsers.android.downloads import AndroidDownloadsParser
+    with tempfile.TemporaryDirectory() as td:
+        db_path = Path(td) / "downloads.db"
+        with sqlite3.connect(db_path) as conn:
+            conn.execute("""
+            CREATE TABLE downloads (
+                _id INTEGER PRIMARY KEY,
+                uri TEXT,
+                _data TEXT,
+                mimetype TEXT,
+                title TEXT,
+                total_bytes INTEGER,
+                status INTEGER,
+                lastmod INTEGER
+            );
+            """)
+            conn.execute("INSERT INTO downloads VALUES (1, 'https://test.org/trojan.apk', '/sdcard/Download/trojan.apk', 'application/vnd.android.package-archive', 'trojan.apk', 1048576, 200, 1672538000000);")
+
+        parser = AndroidDownloadsParser()
+        assert parser.can_parse(db_path)
+        artifacts, timeline = parser.parse(db_path, "ev_test", "case_test")
+        assert len(artifacts) == 1
+        assert len(timeline) == 1
+        assert artifacts[0].normalized_data["filename"] == "trojan.apk"
+        assert artifacts[0].normalized_data["source_url"] == "https://test.org/trojan.apk"
+        assert artifacts[0].normalized_data["file_size_bytes"] == 1048576
+
+def test_android_notifications_parser():
+    from mmf_core.parsers.android.notifications import AndroidNotificationsParser
+    with tempfile.TemporaryDirectory() as td:
+        db_path = Path(td) / "notification_log.db"
+        with sqlite3.connect(db_path) as conn:
+            conn.execute("""
+            CREATE TABLE notifications (
+                _id INTEGER PRIMARY KEY,
+                package_name TEXT,
+                title TEXT,
+                text TEXT,
+                timestamp INTEGER
+            );
+            """)
+            conn.execute("INSERT INTO notifications VALUES (1, 'com.whatsapp', '+15551234', 'Secret deleted message preview', 1672538000000);")
+
+        parser = AndroidNotificationsParser()
+        assert parser.can_parse(db_path)
+        artifacts, timeline = parser.parse(db_path, "ev_test", "case_test")
+        assert len(artifacts) == 1
+        assert len(timeline) == 1
+        assert artifacts[0].normalized_data["package_name"] == "com.whatsapp"
+        assert artifacts[0].normalized_data["message_preview"] == "Secret deleted message preview"
+
+
 

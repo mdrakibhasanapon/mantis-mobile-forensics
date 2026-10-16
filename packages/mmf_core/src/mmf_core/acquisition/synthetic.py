@@ -249,6 +249,88 @@ def generate_synthetic_mobile_package(output_zip_path: Path) -> Path:
     with open(temp_dir / "AndroidManifest.xml", "w", encoding="utf-8") as f:
         f.write(manifest_xml)
 
+    # 9. Android Downloads DB: downloads.db
+    downloads_db_path = temp_dir / "downloads.db"
+    with sqlite3.connect(downloads_db_path) as conn:
+        c = conn.cursor()
+        c.execute("""
+        CREATE TABLE downloads (
+            _id INTEGER PRIMARY KEY AUTOINCREMENT,
+            uri TEXT,
+            _data TEXT,
+            mimetype TEXT,
+            title TEXT,
+            description TEXT,
+            total_bytes INTEGER,
+            status INTEGER,
+            lastmod INTEGER
+        );
+        """)
+        dls = [
+            ("https://darknet-vault.org/drop/payload_rat.apk", "/sdcard/Download/payload_rat.apk", "application/vnd.android.package-archive", "payload_rat.apk", "Sideloaded Trojan Payload", 15420000, 200, int((base_time - timedelta(days=2)).timestamp() * 1000)),
+            ("https://secfore.org/docs/crypto_wallet_recovery.pdf", "/sdcard/Download/crypto_wallet_recovery.pdf", "application/pdf", "crypto_wallet_recovery.pdf", "Cryptocurrency Seed Backup Document", 245000, 200, int((base_time - timedelta(days=1)).timestamp() * 1000)),
+            ("https://cloud-exfil.xyz/audio/dump.wav", "/sdcard/Download/dump.wav", "audio/wav", "dump.wav", "Voice Call Intercept Recording", 5240000, 200, int((base_time - timedelta(hours=6)).timestamp() * 1000)),
+            ("http://darknetvault5h3j4k.onion/orders/fullz.csv", "/sdcard/Download/fullz.csv", "text/csv", "fullz.csv", "Stolen Credit Card Dump", 85000, 200, int((base_time - timedelta(hours=2)).timestamp() * 1000))
+        ]
+        for uri, path, mime, title, desc, size, status, ts in dls:
+            c.execute("INSERT INTO downloads (uri, _data, mimetype, title, description, total_bytes, status, lastmod) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (uri, path, mime, title, desc, size, status, ts))
+        conn.commit()
+
+    # 10. Android Notification Log DB: notification_log.db
+    notif_db_path = temp_dir / "notification_log.db"
+    with sqlite3.connect(notif_db_path) as conn:
+        c = conn.cursor()
+        c.execute("""
+        CREATE TABLE notifications (
+            _id INTEGER PRIMARY KEY AUTOINCREMENT,
+            package_name TEXT,
+            title TEXT,
+            text TEXT,
+            timestamp INTEGER
+        );
+        """)
+        notifs = [
+            ("com.whatsapp", "WhatsApp (+15457845211)", "Emergency: Delete the chat history and destroy SIM card before 0400 hours", int((base_time - timedelta(minutes=45)).timestamp() * 1000)),
+            ("org.telegram.messenger", "Crypto Alerts Bot", "New deposit confirmed: 1.45 BTC received in wallet bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh", int((base_time - timedelta(hours=3)).timestamp() * 1000)),
+            ("org.thoughtcrime.securesms", "Signal (Alice)", "Check the downloaded APK payload on your SD card immediately", int((base_time - timedelta(hours=5)).timestamp() * 1000)),
+            ("com.chase.sigmobile", "Chase Fraud Security", "Suspicious charge alert on Visa card 4532 0150 1234 5671", int((base_time - timedelta(days=1)).timestamp() * 1000)),
+            ("com.google.android.gm", "Google Security Alert", "New login from unknown Kali Linux workstation via Tor exit node", int((base_time - timedelta(days=2)).timestamp() * 1000))
+        ]
+        for pkg, title, text, ts in notifs:
+            c.execute("INSERT INTO notifications (package_name, title, text, timestamp) VALUES (?, ?, ?, ?)", (pkg, title, text, ts))
+        conn.commit()
+
+    # 11. Android Packages Inventory: packages.xml
+    packages_xml_content = """<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<packages>
+  <package name="org.secfore.suspicious_service" codePath="/data/app/org.secfore.suspicious_service-1" it="1672538000000" ut="1672538000000" installer="sideloaded">
+    <perms>
+      <item name="android.permission.INTERNET" />
+      <item name="android.permission.RECORD_AUDIO" />
+      <item name="android.permission.ACCESS_FINE_LOCATION" />
+      <item name="android.permission.READ_SMS" />
+      <item name="android.permission.SEND_SMS" />
+      <item name="android.permission.SYSTEM_ALERT_WINDOW" />
+    </perms>
+  </package>
+  <package name="com.whatsapp" codePath="/data/app/com.whatsapp-2" it="1660000000000" ut="1670000000000" installer="com.android.vending">
+    <perms>
+      <item name="android.permission.CAMERA" />
+      <item name="android.permission.RECORD_AUDIO" />
+      <item name="android.permission.READ_CONTACTS" />
+    </perms>
+  </package>
+  <package name="org.telegram.messenger" codePath="/data/app/org.telegram.messenger-1" it="1665000000000" ut="1671000000000" installer="com.android.vending">
+    <perms>
+      <item name="android.permission.INTERNET" />
+      <item name="android.permission.READ_EXTERNAL_STORAGE" />
+    </perms>
+  </package>
+</packages>"""
+    with open(temp_dir / "packages.xml", "w", encoding="utf-8") as f:
+        f.write(packages_xml_content)
+
+
     # Compress into synthetic mobile package ZIP
     output_zip_path.parent.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(output_zip_path, "w", zipfile.ZIP_DEFLATED) as zipf:

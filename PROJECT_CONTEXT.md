@@ -23,7 +23,7 @@
 | **Auto-Update from GitHub** | `./update.sh` | Pulls latest code, builds frontend, refreshes desktop integration, runs tests. |
 | **Development Server** | `./dev.sh` | Concurrently launches backend (`:8765`) and frontend (`:5173`). |
 | **Launch Desktop Workstation** | `mantis-forensics` | Opens the installed desktop application. |
-| **Run Regression Test Suite** | `./scripts/test.sh` | Runs all 41 pytest forensic tests (must pass 100%). |
+| **Run Regression Test Suite** | `./scripts/test.sh` | Runs all 43 pytest forensic tests (must pass 100%). |
 | **Install / Re-link** | `./install.sh` | Installs desktop shortcuts, icons, and local launcher. |
 | **Build Debian Package** | `./scripts/build_deb.sh` | Builds `mantis-mobile-forensics_1.0.0_amd64.deb`. |
 
@@ -99,6 +99,21 @@
 - **Feature 6: Next-Gen Social App Parsers** (`packages/mmf_core/.../parsers/`):
   - Facebook Messenger (`threads_db2`), IMO (`imofriends.db`), Instagram Direct (`direct_v2.db`), Discord (`messages.db`), and Android User Dictionary (`user_dict.db`).
   - Total automated regression tests: **41/41 passing (100%)**.
+
+### 7. Device Activity & System Traces Hub (Notifications, Downloads, Installed Apps)
+- **Feature Overview**: A dedicated high-visibility forensic workspace (`DeviceActivityPage.tsx`) dividing system-level telemetry into three purpose-built tabs:
+  1. **Push Notifications & Toasts (`notification_log.db`, `wpndatabase.db`)**:
+     - Dedicated parser `AndroidNotificationsParser` (`packages/mmf_core/.../parsers/android/notifications.py`).
+     - Extracts package name, app label, sender title, message preview, and handles Windows FileTime / Unix timestamp normalization.
+     - Forensic value: Recovers deleted chat previews, ephemeral OTP codes, and crypto/banking alerts preserved in notification caches even after messages are deleted from the main messaging app.
+  2. **Download Manager History (`downloads.db`)**:
+     - Dedicated parser `AndroidDownloadsParser` (`packages/mmf_core/.../parsers/android/downloads.py`).
+     - Extracts source URL, destination path, file size, MIME type, download status code (200, 192, 400+), and timestamp.
+     - Forensic value: Identifies APK sideloading, malicious payload downloads, PDF/document exfiltration, and direct origin URLs.
+  3. **Installed Applications & Permissions Audit (`packages.xml`)**:
+     - Visual risk matrix grading applications by dangerous surveillance permissions (`ACCESS_FINE_LOCATION`, `RECORD_AUDIO`, `CAMERA`, `READ_SMS`, `READ_CONTACTS`).
+     - Shows package name, install/update timestamps, APK path, and direct filters for High Risk / System / Sideloaded apps.
+- **Automated Regression Coverage**: **43/43 tests passing (100%)**.
 
 ---
 
