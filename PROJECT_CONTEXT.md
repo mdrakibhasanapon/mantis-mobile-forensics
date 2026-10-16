@@ -51,9 +51,16 @@
 - Created root `update.sh` that pulls from `origin/main`, compiles Vite assets, updates Python/Node dependencies, updates desktop launcher symlinks, and runs verification tests.
 
 ### 3. Git & Multi-Laptop Sync
-- Configured Git remote `git@github.com:mdrakibhasanapon/mantis-mobile-forensics.git`.
+- Configured Git remote `git@github.com:mdrakibhasanapon/mantis-mobile-forensics.git` with SSH authentication.
 - Added comprehensive `.gitignore` preventing 137MB `.deb` builds, `node_modules/`, and cache from bloating the repository.
-- Root convenience scripts: `./install.sh`, `./dev.sh`, `./update.sh`, `requirements.txt`, `requirements-system.txt`.
+- Root convenience scripts: `./install.sh`, `./dev.sh`, `./update.sh`, `sync_chat.sh`, `requirements.txt`, `requirements-system.txt`.
+
+### 4. Cross-Platform Desktop & Multi-Device Hardening (Latest)
+- **Automatic Frontend Build in Installer**: Updated `scripts/build_deb.sh` to automatically install `node_modules` via `npm install` before building Vite assets, preventing `ERR_MODULE_NOT_FOUND`.
+- **Symlink Canonical Resolution**: Fixed launcher scripts (`scripts/mantis-forensics`, `scripts/dev.sh`, `scripts/test.sh`) using a `readlink` resolution loop so `BASH_SOURCE[0]` correctly resolves to the true project root when executed via symlinks in `~/.local/bin/` or `/usr/bin/`, preventing `ModuleNotFoundError: No module named 'mmf_api'`.
+- **Offline Electron Bundling**: Embedded standalone Electron runtime in `electron_bin/dist/` with fallback to `npx electron` for zero-configuration desktop workstation launching.
+- **GNOME Multi-Theme Desktop Icon System**: Resolved desktop menu gear icon fallback by generating full-spectrum PNG resolutions (16x16 to 512x512) and installing them across `hicolor` and active custom themes (e.g. `Flat-Remix-Orange-Dark`), setting an absolute `Icon=` path in the `.desktop` file and updating icon caches.
+- **Multi-Session Chat Synchronization**: Upgraded `sync_chat.sh` to automatically package all active Antigravity conversations across devices and push seamlessly over SSH.
 
 ---
 
