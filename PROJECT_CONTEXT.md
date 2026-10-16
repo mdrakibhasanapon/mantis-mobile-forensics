@@ -23,7 +23,7 @@
 | **Auto-Update from GitHub** | `./update.sh` | Pulls latest code, builds frontend, refreshes desktop integration, runs tests. |
 | **Development Server** | `./dev.sh` | Concurrently launches backend (`:8765`) and frontend (`:5173`). |
 | **Launch Desktop Workstation** | `mantis-forensics` | Opens the installed desktop application. |
-| **Run Regression Test Suite** | `./scripts/test.sh` | Runs all 24 pytest forensic tests (must pass 100%). |
+| **Run Regression Test Suite** | `./scripts/test.sh` | Runs all 32 pytest forensic tests (must pass 100%). |
 | **Install / Re-link** | `./install.sh` | Installs desktop shortcuts, icons, and local launcher. |
 | **Build Debian Package** | `./scripts/build_deb.sh` | Builds `mantis-mobile-forensics_1.0.0_amd64.deb`. |
 
@@ -60,7 +60,28 @@
 - **Symlink Canonical Resolution**: Fixed launcher scripts (`scripts/mantis-forensics`, `scripts/dev.sh`, `scripts/test.sh`) using a `readlink` resolution loop so `BASH_SOURCE[0]` correctly resolves to the true project root when executed via symlinks in `~/.local/bin/` or `/usr/bin/`, preventing `ModuleNotFoundError: No module named 'mmf_api'`.
 - **Offline Electron Bundling**: Embedded standalone Electron runtime in `electron_bin/dist/` with fallback to `npx electron` for zero-configuration desktop workstation launching.
 - **GNOME Multi-Theme Desktop Icon System**: Resolved desktop menu gear icon fallback by generating full-spectrum PNG resolutions (16x16 to 512x512) and installing them across `hicolor` and active custom themes (e.g. `Flat-Remix-Orange-Dark`), setting an absolute `Icon=` path in the `.desktop` file and updating icon caches.
-- **Multi-Session Chat Synchronization**: Upgraded `sync_chat.sh` to automatically package all active Antigravity conversations across devices and push seamlessly over SSH.
+### 5. Next-Gen Mobile Artefact Parsers & Cross-Case Search Engine (Latest)
+- **Telegram Forensic Parser** (`packages/mmf_core/.../apps/telegram.py`):
+  - Extracts users, dialogs, contacts, messages (`cache4.db`), handles outgoing/incoming flags, Unix epoch normalization.
+- **Signal Encrypted Store Parser** (`packages/mmf_core/.../apps/signal.py`):
+  - Extracts conversations, recipients, messages (`signal.db`), timestamp normalization from milliseconds.
+- **Android Wi-Fi Configurations** (`packages/mmf_core/.../android/wifi.py`):
+  - Parses `WifiConfigStore.xml` and legacy `wpa_supplicant.conf`. Extracts SSIDs, PSKs/PreSharedKeys, security suites (WPA_PSK, SAE, etc.), and creation timestamps.
+- **Android Bluetooth Pairings** (`packages/mmf_core/.../android/bluetooth.py`):
+  - Parses `bt_config.conf` / `bt_config.xml`. Extracts paired MAC addresses, device names, device class (CoD), and Link Keys.
+- **Android Package Inventory & Dangerous Permissions** (`packages/mmf_core/.../android/packages.py`):
+  - Parses `packages.xml` / `packages.list`. Audits installed apps, install/update timestamps, APK paths, and flags dangerous surveillance permissions (SMS, audio recording, camera, location, contacts).
+- **iOS iMessage & SMS Parser** (`packages/mmf_core/.../ios/sms.py`):
+  - Parses iOS `sms.db`. Extracts chat handles, text, service type (`iMessage` vs `SMS`), and converts Apple Cocoa nanoseconds to UTC ISO-8601.
+- **iOS Call History** (`packages/mmf_core/.../ios/callhistory.py`):
+  - Parses iOS `CallHistory.storedata` (`ZCALLRECORD`). Extracts caller/callee, duration, origination, answer state, and converts Cocoa timestamps.
+- **iOS Safari Mobile History** (`packages/mmf_core/.../ios/safari.py`):
+  - Parses iOS `History.db`. Extracts visited URLs, page titles, visit counts, redirect attributes, and converts Cocoa epochs.
+- **Global Cross-Case Search API** (`apps/api/.../forensics.py`):
+  - Added `@router.get("/search")` endpoint supporting regex and keyword queries across all ingested case artifacts and timeline events.
+- **Frontend & Test Coverage**:
+  - Added `wireless` category filter tab & badges to `ArtifactsPage.tsx`.
+  - Added comprehensive unit tests in `tests/unit/test_parsers.py` (32/32 tests passing 100%).
 
 ---
 

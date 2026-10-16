@@ -35,9 +35,10 @@ export const ArtifactsPage: React.FC<ArtifactsPageProps> = ({
 
   const categories = [
     { id: 'all', label: 'All Categories' },
-    { id: 'contacts', label: 'Contacts' },
-    { id: 'messages', label: 'Messages & SMS' },
+    { id: 'messages', label: 'Messages & Chats' },
     { id: 'calls', label: 'Call Logs' },
+    { id: 'contacts', label: 'Contacts' },
+    { id: 'wireless', label: 'Wireless (Wi-Fi / BT)' },
     { id: 'browser', label: 'Browser History' },
     { id: 'installed_apps', label: 'Installed Apps' },
   ];
@@ -125,6 +126,8 @@ export const ArtifactsPage: React.FC<ArtifactsPageProps> = ({
               artifacts.map((art) => {
                 const norm = art.normalized_data || {};
                 const summary =
+                  norm.network_name ||
+                  norm.package_name ||
                   norm.contact_name ||
                   norm.phone_number ||
                   norm.message_body ||
@@ -139,14 +142,19 @@ export const ArtifactsPage: React.FC<ArtifactsPageProps> = ({
                     <td className="py-2 px-3 text-slate-400 whitespace-nowrap">
                       {art.timestamp_utc ? new Date(art.timestamp_utc).toLocaleString() : 'N/A'}
                     </td>
-                    <td className="py-2 px-3">
+                    <td className="py-2 px-3 whitespace-nowrap">
                       <span className="px-2 py-0.5 rounded bg-[#172333] border border-[#23354d] text-cyan-400 text-[10px] font-sans uppercase font-semibold">
                         {art.category}
                       </span>
+                      {art.subcategory && (
+                        <span className="ml-1.5 px-1.5 py-0.5 rounded bg-emerald-950/60 border border-emerald-700/50 text-emerald-300 text-[10px] font-sans uppercase font-medium">
+                          {art.subcategory}
+                        </span>
+                      )}
                     </td>
                     <td className="py-2 px-3 text-slate-200 max-w-md truncate font-sans">
                       <strong className="text-cyan-300 font-mono mr-1">
-                        {norm.sender_or_recipient ? `[${norm.sender_or_recipient}]` : ''}
+                        {norm.sender_or_recipient ? `[${norm.sender_or_recipient}]` : norm.app ? `[${norm.app}]` : ''}
                       </strong>
                       {summary}
                     </td>

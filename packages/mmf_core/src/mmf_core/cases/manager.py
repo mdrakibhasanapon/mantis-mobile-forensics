@@ -3,6 +3,7 @@ import sqlite3
 import os
 import json
 import uuid
+import tempfile
 from pathlib import Path
 from datetime import datetime, timezone
 from typing import List, Optional, Dict, Any
@@ -25,7 +26,7 @@ def get_default_data_dir() -> Path:
         primary.mkdir(parents=True, exist_ok=True)
         return primary
     except (OSError, PermissionError):
-        fallback = Path("/home/kali/.gemini/antigravity/scratch/mantis-mobile-forensics/data")
+        fallback = Path(tempfile.gettempdir()) / "mantis-forensics"
         fallback.mkdir(parents=True, exist_ok=True)
         return fallback
 

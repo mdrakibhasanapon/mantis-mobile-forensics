@@ -14,17 +14,24 @@ MMF couples an **Electron desktop shell** with a local **Python FastAPI forensic
 
 ## Key Forensic Capabilities
 
-1. **Android Artefact Engine**:
+1. **Android & Mobile Artefact Engines**:
    - Contacts parsing (`contacts2.db` raw contacts and structured data)
    - SMS and MMS text messaging (`mmssms.db`)
    - Telephony call logs with duration and direction (`calllog.db`)
    - Chrome / WebKit browser history and visits (`History`)
    - WhatsApp message store decryption & parsing (`msgstore.db`)
-   - Android application package inspection (`AndroidManifest.xml`)
+   - Telegram mobile / desktop store (`cache4.db`, users, dialogs, messages)
+   - Signal encrypted local message store (`signal.db`, threads, recipients)
+   - Android application package inspection & permissions (`AndroidManifest.xml`, `packages.xml`, `packages.list`)
+   - Android Wi-Fi network configurations & credentials (`WifiConfigStore.xml`, `wpa_supplicant.conf`)
+   - Android Bluetooth paired device database & link keys (`bt_config.conf`, `bt_config.xml`)
 
 2. **iOS & iPadOS Backup Analysis**:
    - Unencrypted & password-authorized iTunes / Finder backup imports
    - Device and backup state inspection (`Info.plist`, `Status.plist`, `Manifest.db`)
+   - iMessage & SMS conversation extraction (`sms.db`, handles, timestamps)
+   - iOS Call History logs (`CallHistory.storedata`, `ZCALLRECORD`)
+   - Safari mobile web browsing history (`History.db`)
    - Normalization of WebKit / Cocoa timestamps to standard UTC ISO-8601
 
 3. **Evidence Vault & Chain of Custody**:

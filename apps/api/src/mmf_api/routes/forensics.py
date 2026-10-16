@@ -102,3 +102,32 @@ def get_sqlite_freelist(case_id: str, relative_db_path: str = Query(...)):
         return {"carved_strings": strings, "count": len(strings)}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+@router.get("/search")
+def global_forensic_search(
+    case_id: str,
+    query: str = Query(..., min_length=1, description="Keyword, phone, email, or domain search query"),
+    limit: int = Query(200, le=1000)
+):
+    """Global forensic search matching across all artifacts, messages, calls, contacts, and timeline events."""
+    import json
+    case = case_manager.get_case(case_id)
+    if not case:
+        raise HTTPException(status_code=404, detail="Case not found")
+
+    artifacts = case_manager.list_artifacts(case_id=case_id, search_query=query, limit=limit)
+    timeline_events = case_manager.list_timeline(case_id=case_id, limit=limit)
+
+    matched_events = [
+        ev for ev in timeline_events
+        if query.lower() in ev.title.lower() or query.lower() in ev.description.lower() or query.lower() in json.dumps(ev.details).lower()
+    ]
+
+    return {
+        "case_id": case_id,
+        "query": query,
+        "artifact_matches": artifacts,
+        "timeline_matches": matched_events,
+        "total_results": len(artifacts) + len(matched_events)
+    }
+

@@ -17,6 +17,7 @@ echo "  Running Mantis Mobile Forensics Test Suite"
 echo "=========================================================="
 
 export PYTHONPATH="${ROOT_DIR}/packages/mmf_core/src:${ROOT_DIR}/apps/api/src:${PYTHONPATH:-}"
+export MMF_DATA_DIR="${MMF_DATA_DIR:-/tmp/mantis-forensics-test}"
 
 cd "${ROOT_DIR}"
 python3 -m pytest tests/ -v --tb=short
