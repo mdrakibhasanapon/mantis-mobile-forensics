@@ -79,12 +79,19 @@ mantis-mobile-forensics/
 
 ## Quick Start & Installation
 
-Clone the repository and run the automated setup script:
+### ⚡ Option 1: 1-Line Instant Installer (Zero manual steps)
+Simply paste this single command in terminal and press Enter:
 
 ```bash
-git clone https://github.com/mdrakibhasanapon/mantis-mobile-forensics.git
-cd mantis-mobile-forensics
-./setup.sh
+curl -sSL https://raw.githubusercontent.com/mdrakibhasanapon/mantis-mobile-forensics/main/setup.sh | bash
+```
+*This automatically clones the repository, installs all dependencies (Python, Node, Electron), builds the UI, and creates the Desktop and Application Menu shortcuts without any manual commands.*
+
+---
+
+### 💻 Option 2: 1-Line Git Clone & Setup
+```bash
+git clone https://github.com/mdrakibhasanapon/mantis-mobile-forensics.git && cd mantis-mobile-forensics && ./setup.sh
 ```
 
 ### What `./setup.sh` Does Automatically:
