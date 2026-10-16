@@ -81,17 +81,23 @@ if [ "$MODE" = "restore" ]; then
     echo -e "${GREEN}==========================================================${NC}"
 
 elif [ "$MODE" = "backup" ]; then
-    echo -e "${BLUE}[SYNC]${NC} Packaging current Antigravity conversation for GitHub..."
-    if [ ! -d "$TARGET_BRAIN_DIR" ]; then
-        echo -e "${AMBER}[WARN] Active chat not found at ${TARGET_BRAIN_DIR}.${NC}"
+    CONV_DIRS=()
+    for d in "$BRAIN_BASE_DIR"/*; do
+        if [ -d "$d" ] && [ "$(basename "$d")" != "tempmediaStorage" ]; then
+            CONV_DIRS+=("$(basename "$d")")
+        fi
+    done
+
+    if [ ${#CONV_DIRS[@]} -eq 0 ]; then
+        echo -e "${AMBER}[WARN] No conversation sessions found in ${BRAIN_BASE_DIR}.${NC}"
         exit 1
     fi
 
     mkdir -p "${ROOT_DIR}"
-    tar -czf "$BACKUP_ARCHIVE" -C "$BRAIN_BASE_DIR" "$CONVERSATION_ID"
+    tar -czf "$BACKUP_ARCHIVE" -C "$BRAIN_BASE_DIR" "${CONV_DIRS[@]}"
     ARCHIVE_SIZE="$(du -h "$BACKUP_ARCHIVE" | cut -f1)"
 
-    echo -e "${GREEN}  -> Conversation packaged cleanly (${ARCHIVE_SIZE}).${NC}"
+    echo -e "${GREEN}  -> Conversations packaged cleanly (${ARCHIVE_SIZE}): ${CONV_DIRS[*]}${NC}"
 
     # Auto commit and push if in git repo
     if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
