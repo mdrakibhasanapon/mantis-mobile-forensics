@@ -2,7 +2,14 @@
 # Mantis Mobile Forensics - Main Application Launcher
 set -e
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Resolve symlinks to find real script and root directory
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do
+    DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+    SOURCE="$(readlink "$SOURCE")"
+    [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 # Resolve installation directory if installed in /opt
@@ -104,6 +111,8 @@ fi
 ELECTRON_BIN=""
 if [ -x "${APP_DIR}/electron_bin/dist/electron" ]; then
     ELECTRON_BIN="${APP_DIR}/electron_bin/dist/electron"
+elif [ -x "${HOME}/.gemini/antigravity/scratch/electron_bin/dist/electron" ]; then
+    ELECTRON_BIN="${HOME}/.gemini/antigravity/scratch/electron_bin/dist/electron"
 elif [ -x "/home/kali/.gemini/antigravity/scratch/electron_bin/dist/electron" ]; then
     ELECTRON_BIN="/home/kali/.gemini/antigravity/scratch/electron_bin/dist/electron"
 elif which electron >/dev/null 2>&1; then
@@ -111,6 +120,10 @@ elif which electron >/dev/null 2>&1; then
 fi
 
 if [ -z "${ELECTRON_BIN}" ]; then
+    if command -v npx >/dev/null 2>&1; then
+        echo "[MANTIS] Launching Desktop Workstation with npx electron..."
+        exec npx electron --no-sandbox "${APP_DIR}/apps/desktop" "$@"
+    fi
     echo "[MANTIS] Electron binary not found. Launching in headless API mode..."
     exec python3 -m mmf_api.main --host 127.0.0.1 --port "${PORT}" --data-dir "${DATA_DIR}"
 fi

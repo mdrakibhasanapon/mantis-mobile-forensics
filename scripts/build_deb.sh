@@ -15,10 +15,15 @@ echo "=========================================================="
 # 1. Ensure web frontend is built
 echo "[BUILD] Verifying web production assets..."
 cd "${ROOT_DIR}/apps/web"
-if [ ! -d "dist" ]; then
-    echo "[BUILD] Building Vite frontend..."
-    npx vite build
+if [ ! -d "node_modules" ]; then
+    echo "[BUILD] Installing web frontend dependencies (npm install)..."
+    npm install
 fi
+if [ ! -f "dist/index.html" ]; then
+    echo "[BUILD] Building Vite frontend..."
+    npm run build
+fi
+
 
 # 2. Prepare staging directory
 rm -rf "${STAGING}"
@@ -81,7 +86,11 @@ cp "${ROOT_DIR}/README.md" "${STAGING}/opt/mantis-mobile-forensics/"
 cp "${ROOT_DIR}/LICENSE" "${STAGING}/opt/mantis-mobile-forensics/"
 
 # Include Electron binary if cached
-if [ -d "/home/kali/.gemini/antigravity/scratch/electron_bin/dist" ]; then
+if [ -d "${HOME}/.gemini/antigravity/scratch/electron_bin/dist" ]; then
+    echo "[BUILD] Bundling Electron binary..."
+    mkdir -p "${STAGING}/opt/mantis-mobile-forensics/electron_bin"
+    cp -r "${HOME}/.gemini/antigravity/scratch/electron_bin/dist" "${STAGING}/opt/mantis-mobile-forensics/electron_bin/"
+elif [ -d "/home/kali/.gemini/antigravity/scratch/electron_bin/dist" ]; then
     echo "[BUILD] Bundling Electron binary..."
     mkdir -p "${STAGING}/opt/mantis-mobile-forensics/electron_bin"
     cp -r "/home/kali/.gemini/antigravity/scratch/electron_bin/dist" "${STAGING}/opt/mantis-mobile-forensics/electron_bin/"

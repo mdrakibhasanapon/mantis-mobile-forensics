@@ -181,19 +181,42 @@ if mkdir -p "${HOME}/.local/bin" 2>/dev/null; then
     ln -sf "${ROOT_DIR}/scripts/mantis-forensics" "${HOME}/.local/bin/mantis-forensics" 2>/dev/null || true
 
     # Update icons & desktop file
+    mkdir -p "${HOME}/.local/share/icons/hicolor/256x256/apps" 2>/dev/null || true
+    mkdir -p "${HOME}/.local/share/icons/hicolor/512x512/apps" 2>/dev/null || true
     if [ -f "${ROOT_DIR}/assets/icon.svg" ]; then
         cp -f "${ROOT_DIR}/assets/icon.svg" "${HOME}/.local/share/icons/hicolor/scalable/apps/mantis.svg" 2>/dev/null || true
     fi
     if [ -f "${ROOT_DIR}/assets/mantis.png" ]; then
         cp -f "${ROOT_DIR}/assets/mantis.png" "${HOME}/.local/share/pixmaps/mantis.png" 2>/dev/null || true
+        cp -f "${ROOT_DIR}/assets/mantis.png" "${HOME}/.local/share/icons/hicolor/256x256/apps/mantis.png" 2>/dev/null || true
     fi
+    if [ -f "${ROOT_DIR}/assets/icon.png" ]; then
+        cp -f "${ROOT_DIR}/assets/icon.png" "${HOME}/.local/share/icons/hicolor/512x512/apps/mantis.png" 2>/dev/null || true
+    fi
+
+    # Also install into custom user themes if present (e.g. Flat-Remix)
+    for theme_dir in "${HOME}/.local/share/icons"/*; do
+        if [ -d "${theme_dir}" ] && [ "$(basename "${theme_dir}")" != "hicolor" ]; then
+            mkdir -p "${theme_dir}/48x48/apps" "${theme_dir}/256x256/apps" 2>/dev/null || true
+            cp -f "${ROOT_DIR}/assets/mantis.png" "${theme_dir}/48x48/apps/mantis.png" 2>/dev/null || true
+            cp -f "${ROOT_DIR}/assets/mantis.png" "${theme_dir}/256x256/apps/mantis.png" 2>/dev/null || true
+            if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+                gtk-update-icon-cache -f -t "${theme_dir}" >/dev/null 2>&1 || true
+            fi
+        fi
+    done
+
     if [ -f "${ROOT_DIR}/assets/mantis-mobile-forensics.desktop" ]; then
-        sed "s|Exec=mantis-forensics|Exec=${HOME}/.local/bin/mantis-forensics|g" \
+        sed -e "s|Exec=mantis-forensics|Exec=${HOME}/.local/bin/mantis-forensics|g" \
+            -e "s|Icon=mantis|Icon=${HOME}/.local/share/icons/hicolor/256x256/apps/mantis.png|g" \
             "${ROOT_DIR}/assets/mantis-mobile-forensics.desktop" > "${HOME}/.local/share/applications/mantis-mobile-forensics.desktop" 2>/dev/null || true
     fi
 
     if command -v update-desktop-database >/dev/null 2>&1; then
         update-desktop-database "${HOME}/.local/share/applications" >/dev/null 2>&1 || true
+    fi
+    if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+        gtk-update-icon-cache -f -t "${HOME}/.local/share/icons/hicolor" >/dev/null 2>&1 || true
     fi
 
     echo -e "${GREEN}  -> User desktop launcher and application menu refreshed.${NC}"

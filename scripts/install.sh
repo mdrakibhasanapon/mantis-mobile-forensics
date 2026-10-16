@@ -22,6 +22,13 @@ if [ "$(id -u)" -eq 0 ]; then
     echo "[INSTALL] Successfully installed system-wide in /opt/mantis-mobile-forensics!"
 else
     # Non-root / user-level installation
+    # Verify Python dependencies
+    if ! python3 -c "import fastapi, uvicorn, pydantic" >/dev/null 2>&1; then
+        echo "[INSTALL] Installing missing Python dependencies..."
+        pip3 install -q --no-input -r "${ROOT_DIR}/requirements.txt" --break-system-packages 2>/dev/null || \
+        pip3 install -q --no-input -r "${ROOT_DIR}/requirements.txt" 2>/dev/null || true
+    fi
+
     echo "[INSTALL] Setting up user-level desktop integration in ~/.local..."
     mkdir -p "${HOME}/.local/bin"
     mkdir -p "${HOME}/.local/share/applications"
@@ -31,16 +38,36 @@ else
     # Symlink launcher
     ln -sf "${ROOT_DIR}/scripts/mantis-forensics" "${HOME}/.local/bin/mantis-forensics"
 
-    # Copy icons
+    # Copy icons to standard resolutions
+    mkdir -p "${HOME}/.local/share/icons/hicolor/256x256/apps"
+    mkdir -p "${HOME}/.local/share/icons/hicolor/512x512/apps"
+    cp "${ROOT_DIR}/assets/mantis.png" "${HOME}/.local/share/icons/hicolor/256x256/apps/mantis.png"
+    cp "${ROOT_DIR}/assets/icon.png" "${HOME}/.local/share/icons/hicolor/512x512/apps/mantis.png"
     cp "${ROOT_DIR}/assets/icon.svg" "${HOME}/.local/share/icons/hicolor/scalable/apps/mantis.svg"
     cp "${ROOT_DIR}/assets/mantis.png" "${HOME}/.local/share/pixmaps/mantis.png"
 
-    # Adapt and install desktop file with absolute user path
-    sed "s|Exec=mantis-forensics|Exec=${HOME}/.local/bin/mantis-forensics|g" \
+    # Also install into custom user themes if present (e.g. Flat-Remix)
+    for theme_dir in "${HOME}/.local/share/icons"/*; do
+        if [ -d "${theme_dir}" ] && [ "$(basename "${theme_dir}")" != "hicolor" ]; then
+            mkdir -p "${theme_dir}/48x48/apps" "${theme_dir}/256x256/apps" 2>/dev/null || true
+            cp "${ROOT_DIR}/assets/mantis.png" "${theme_dir}/48x48/apps/mantis.png" 2>/dev/null || true
+            cp "${ROOT_DIR}/assets/mantis.png" "${theme_dir}/256x256/apps/mantis.png" 2>/dev/null || true
+            if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+                gtk-update-icon-cache -f -t "${theme_dir}" >/dev/null 2>&1 || true
+            fi
+        fi
+    done
+
+    # Adapt and install desktop file with absolute user path and absolute icon path
+    sed -e "s|Exec=mantis-forensics|Exec=${HOME}/.local/bin/mantis-forensics|g" \
+        -e "s|Icon=mantis|Icon=${HOME}/.local/share/icons/hicolor/256x256/apps/mantis.png|g" \
         "${ROOT_DIR}/assets/mantis-mobile-forensics.desktop" > "${HOME}/.local/share/applications/mantis-mobile-forensics.desktop"
 
     if command -v update-desktop-database >/dev/null 2>&1; then
         update-desktop-database "${HOME}/.local/share/applications" || true
+    fi
+    if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+        gtk-update-icon-cache -f -t "${HOME}/.local/share/icons/hicolor" >/dev/null 2>&1 || true
     fi
 
     echo "[INSTALL] User desktop entry and launcher installed successfully!"
