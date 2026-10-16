@@ -131,3 +131,81 @@ def global_forensic_search(
         "total_results": len(artifacts) + len(matched_events)
     }
 
+@router.get("/locations")
+def get_case_locations(case_id: str):
+    """Returns all geolocation artifacts (EXIF GPS, cellular, or Wi-Fi geo coordinates) for mapping."""
+    case = case_manager.get_case(case_id)
+    if not case:
+        raise HTTPException(status_code=404, detail="Case not found")
+
+    artifacts = case_manager.list_artifacts(case_id, limit=5000)
+    locations = []
+    for art in artifacts:
+        norm = art.normalized_data
+        lat = norm.get("latitude")
+        lon = norm.get("longitude")
+        if lat is not None and lon is not None:
+            try:
+                lat_f = float(lat)
+                lon_f = float(lon)
+                locations.append({
+                    "id": art.id,
+                    "evidence_id": art.evidence_id,
+                    "latitude": lat_f,
+                    "longitude": lon_f,
+                    "altitude": norm.get("altitude_meters"),
+                    "timestamp": art.timestamp_utc,
+                    "source_file": art.source_file,
+                    "camera": norm.get("camera_device") or norm.get("camera"),
+                    "title": art.notes or f"GPS Point: {lat_f}, {lon_f}",
+                    "category": art.category,
+                    "subcategory": art.subcategory
+                })
+            except (ValueError, TypeError):
+                continue
+
+    return {
+        "case_id": case_id,
+        "total_locations": len(locations),
+        "locations": locations
+    }
+
+@router.get("/link-analysis")
+def get_link_analysis(case_id: str):
+    """Generates communication relationship graph, entity nodes, edges, and 24h activity heatmap."""
+    from mmf_core.correlation.engine import CorrelationEngine
+    case = case_manager.get_case(case_id)
+    if not case:
+        raise HTTPException(status_code=404, detail="Case not found")
+
+    artifacts = case_manager.list_artifacts(case_id, limit=5000)
+    graph_data = CorrelationEngine.build_communication_graph(case_id, artifacts)
+    return graph_data
+
+@router.post("/triage/scan")
+def run_deep_triage_scan(case_id: str):
+    """Executes deep pattern scanner (crypto wallets, payment cards, secrets, darkweb, and keywords)."""
+    from mmf_core.triage.analyzer import TriageAnalyzer
+    case = case_manager.get_case(case_id)
+    if not case:
+        raise HTTPException(status_code=404, detail="Case not found")
+
+    artifacts = case_manager.list_artifacts(case_id, limit=5000)
+    findings = TriageAnalyzer.scan_artifacts(case_id, artifacts)
+    if findings:
+        case_manager.add_triage_findings(case_id, findings)
+        case_manager.add_audit_log(
+            case_id=case_id,
+            action="deep_triage_scan",
+            actor=case.investigator,
+            details={"findings_identified": len(findings)}
+        )
+
+    return {
+        "case_id": case_id,
+        "scanned_artifacts": len(artifacts),
+        "new_findings_count": len(findings),
+        "findings": findings
+    }
+
+

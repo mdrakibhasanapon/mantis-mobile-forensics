@@ -375,3 +375,47 @@ class ForensicReportGenerator:
                     e.get("raw_timestamp")
                 ])
         return output_path
+
+    @staticmethod
+    def generate_pdf_report(case_data: Dict[str, Any], output_path: Path) -> Path:
+        """Generates an official, print-ready PDF forensic report using WeasyPrint."""
+        try:
+            import weasyprint
+        except ImportError:
+            raise RuntimeError("weasyprint package is required for PDF generation. Install via pip or apt.")
+
+        html_temp = output_path.with_suffix(".temp.html")
+        ForensicReportGenerator.generate_html_report(case_data, html_temp)
+        with open(html_temp, "r", encoding="utf-8") as f:
+            html_content = f.read()
+
+        print_css = """
+        <style>
+            @page {
+                size: A4 portrait;
+                margin: 12mm;
+                @bottom-right {
+                    content: "Page " counter(page) " of " counter(pages);
+                    font-size: 8pt;
+                    color: #94a3b8;
+                }
+                @bottom-left {
+                    content: "MANTIS MOBILE FORENSICS (MMF) - OFFICIAL CASE EXAMINATION REPORT";
+                    font-size: 8pt;
+                    color: #94a3b8;
+                }
+            }
+            body { font-size: 10px; }
+            table { page-break-inside: auto; }
+            tr { page-break-inside: avoid; page-break-after: auto; }
+            .card, .header, .summary-grid { page-break-inside: avoid; }
+            h2, h3 { page-break-after: avoid; }
+        </style>
+        """
+        html_styled = html_content.replace("</head>", f"{print_css}</head>")
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        weasyprint.HTML(string=html_styled).write_pdf(target=str(output_path))
+        if html_temp.exists():
+            html_temp.unlink()
+        return output_path
+

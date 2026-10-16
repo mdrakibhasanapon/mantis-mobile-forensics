@@ -22,6 +22,11 @@ MMF couples an **Electron desktop shell** with a local **Python FastAPI forensic
    - WhatsApp message store decryption & parsing (`msgstore.db`)
    - Telegram mobile / desktop store (`cache4.db`, users, dialogs, messages)
    - Signal encrypted local message store (`signal.db`, threads, recipients)
+   - Facebook Messenger database (`threads_db2`, participants, messages, attachments)
+   - IMO Messenger chat & contacts (`imofriends.db`, `account.db`)
+   - Instagram Direct messages (`direct_v2.db`)
+   - Discord mobile message repository (`messages.db`, channels)
+   - Android user dictionary & keyboard input (`user_dict.db`)
    - Android application package inspection & permissions (`AndroidManifest.xml`, `packages.xml`, `packages.list`)
    - Android Wi-Fi network configurations & credentials (`WifiConfigStore.xml`, `wpa_supplicant.conf`)
    - Android Bluetooth paired device database & link keys (`bt_config.conf`, `bt_config.xml`)
@@ -34,31 +39,44 @@ MMF couples an **Electron desktop shell** with a local **Python FastAPI forensic
    - Safari mobile web browsing history (`History.db`)
    - Normalization of WebKit / Cocoa timestamps to standard UTC ISO-8601
 
-3. **Evidence Vault & Chain of Custody**:
+3. **Live Mobile USB Extraction Wizard**:
+   - Real-time Android Debug Bridge (ADB) device detection and hardware discovery
+   - Live root privilege verification (`su -c id`, `whoami`)
+   - System diagnostics: live battery level, hardware health, storage utilization
+   - One-click logical extraction modes: Quick Triage (properties, packages, logcat buffer), Media (`/sdcard/DCIM`), and App databases
+
+4. **Geolocation & EXIF Photo Intelligence**:
+   - EXIF metadata parser extracting GPS Latitude, Longitude, Altitude, Camera Make/Model, and Timestamps from JPEG, PNG, TIFF, HEIC
+   - Automatic DMS rational conversion to precision decimal degrees
+   - Interactive Geo-Map viewer with coordinate pins, camera metadata, and direct OpenStreetMap / Google Maps pivots
+
+5. **Communication Link Analysis & Network Graph**:
+   - Visual nodal relationship graph mapping target suspect against frequent contacts
+   - Channel breakdown: voice calls, WhatsApp, Telegram, Signal, Messenger, SMS
+   - 24-Hour activity distribution (Pattern of Life heatmap) identifying sleep/wake activity cycles
+
+6. **Automated Deep IOC & Malware Triage Scanner**:
+   - Cryptocurrency wallet scanner: Bitcoin (BTC), Ethereum (ETH), Monero (XMR)
+   - Payment card detection with standard Luhn algorithm validation (Visa, MasterCard, Amex)
+   - Cryptographic private keys, AWS access keys, JWT tokens, and seed phrase indicators
+   - Dark Web (.onion) and suspicious C2 marker detection
+   - Configurable high-risk investigation keyword scanner
+
+7. **Evidence Vault & Cryptographic Chain of Custody**:
    - Original evidence stored in read-only vault (`chmod 0444`)
    - Streaming chunked SHA-256 and MD5 cryptographic integrity verification
    - Append-only, cryptographically chained SHA-256 audit trail with tamper detection
    - Complete isolation: case data stored in `~/.local/share/mantis-forensics`, **never** inside the app directory
 
-4. **SQLite Freelist Carving & Deleted-Data Recovery**:
+8. **SQLite Freelist Carving & Deleted-Data Recovery**:
    - Header inspection: page size, total pages, freelist page count, change counter, WAL/SHM status
    - Safe read-only SQL queries with forbidden DDL/DML rejection
-   - Regex-based and freelist byte carving with confidence ratings:
-     - `INTACT`, `DELETED_RECOVERED`, `RECONSTRUCTED`, `INFERRED`, `UNVERIFIED`
+   - Regex-based and freelist byte carving with confidence ratings
 
-5. **Cross-Source Deterministic Correlation**:
-   - Deterministic matching of phone numbers, email addresses, and account handles across independent evidence items
-   - Occurrence counting and context attribution
-
-6. **Local Security & Malware Triage**:
-   - Heuristic analysis of dangerous Android permissions (SMS reading/sending, audio recording, boot completion)
-   - Suspicious C2 domain and `.onion` pattern matching
-   - 100% offline: zero external telemetry, zero automated cloud uploading
-
-7. **Professional Evidence Reporting**:
-   - Executive HTML report with dark DFIR workstation styling and print CSS
-   - Cryptographic JSON case manifests
-   - CSV timeline and evidence exports
+9. **Professional Forensic Case Reporting**:
+   - Official, print-ready PDF case dossiers rendered via WeasyPrint with A4 pagination and header/footer stamps
+   - Interactive HTML investigation reports with dark DFIR workstation styling
+   - Cryptographic JSON case manifests and CSV timeline exports
 
 ---
 

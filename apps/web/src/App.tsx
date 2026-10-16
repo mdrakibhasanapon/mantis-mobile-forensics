@@ -19,6 +19,7 @@ import { RecoveryPage } from './pages/RecoveryPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { AuditLogPage } from './pages/AuditLogPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { GeoMapPage } from './pages/GeoMapPage';
 
 export const App: React.FC = () => {
   const [currentTab, setCurrentTab] = useState<string>('dashboard');
@@ -146,7 +147,13 @@ export const App: React.FC = () => {
             />
           )}
 
-          {currentTab === 'devices' && <DevicesPage />}
+          {currentTab === 'devices' && (
+            <DevicesPage
+              activeCase={activeCase}
+              onRefreshEvidence={refreshAll}
+              onNavigateTab={setCurrentTab}
+            />
+          )}
 
           {currentTab === 'acquisition' && (
             <AcquisitionPage
@@ -182,6 +189,10 @@ export const App: React.FC = () => {
 
           {currentTab === 'correlation' && (
             <CorrelationsPage caseId={activeCase?.id || ''} />
+          )}
+
+          {currentTab === 'geomap' && (
+            <GeoMapPage activeCase={activeCase} />
           )}
 
           {currentTab === 'media' && (

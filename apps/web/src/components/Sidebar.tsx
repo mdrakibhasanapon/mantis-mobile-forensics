@@ -17,6 +17,7 @@ import {
   FileText,
   History,
   Settings,
+  MapPin,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -37,9 +38,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab, activ
     { id: 'sqlite', label: 'SQLite Forensic Explorer', icon: Database },
     { id: 'timeline', label: 'Unified Timeline', icon: Clock },
     { id: 'correlation', label: 'Correlation Graph', icon: Share2 },
+    { id: 'geomap', label: 'Geo-Map & EXIF', icon: MapPin },
     { id: 'media', label: 'Media Gallery', icon: Image },
     { id: 'search', label: 'Global Search', icon: Search },
-    { id: 'triage', label: 'Malware Triage', icon: ShieldAlert },
+    { id: 'triage', label: 'Malware & IOC Triage', icon: ShieldAlert },
     { id: 'ai', label: 'Forensic Assistant', icon: Cpu },
     { id: 'reports', label: 'Forensic Reports', icon: FileText },
     { id: 'audit', label: 'Audit Trail', icon: History },

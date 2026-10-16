@@ -23,7 +23,7 @@
 | **Auto-Update from GitHub** | `./update.sh` | Pulls latest code, builds frontend, refreshes desktop integration, runs tests. |
 | **Development Server** | `./dev.sh` | Concurrently launches backend (`:8765`) and frontend (`:5173`). |
 | **Launch Desktop Workstation** | `mantis-forensics` | Opens the installed desktop application. |
-| **Run Regression Test Suite** | `./scripts/test.sh` | Runs all 32 pytest forensic tests (must pass 100%). |
+| **Run Regression Test Suite** | `./scripts/test.sh` | Runs all 41 pytest forensic tests (must pass 100%). |
 | **Install / Re-link** | `./install.sh` | Installs desktop shortcuts, icons, and local launcher. |
 | **Build Debian Package** | `./scripts/build_deb.sh` | Builds `mantis-mobile-forensics_1.0.0_amd64.deb`. |
 
@@ -82,6 +82,23 @@
 - **Frontend & Test Coverage**:
   - Added `wireless` category filter tab & badges to `ArtifactsPage.tsx`.
   - Added comprehensive unit tests in `tests/unit/test_parsers.py` (32/32 tests passing 100%).
+
+### 6. Enterprise Mobile Forensics Suite (Live Extraction, EXIF Geo-Map, Link Graph, Deep Triage, PDF Reports, Social Parsers)
+- **Feature 1: Live Mobile USB Extraction Wizard** (`packages/mmf_core/.../acquisition/android/adb.py`, `routes/devices.py`, `DevicesPage.tsx`):
+  - ADB hardware discovery, root verification (`su -c id`, `whoami`), battery/storage diagnostics.
+  - One-click logical extraction into case vault (quick triage, media `/sdcard/DCIM`, packages).
+- **Feature 2: Geolocation & EXIF Interactive Map** (`packages/mmf_core/.../parsers/media/exif.py`, `routes/forensics.py`, `GeoMapPage.tsx`):
+  - EXIF GPS parser extracting Latitude, Longitude, Altitude, Camera metadata from images (JPEG, PNG, TIFF, HEIC).
+  - Dedicated Geo-Map page with coordinate pins and OpenStreetMap / Google Maps pivots.
+- **Feature 3: Communication Link Analysis & Nodal Graph** (`packages/mmf_core/.../correlation/engine.py`, `routes/forensics.py`, `CorrelationsPage.tsx`):
+  - Central suspect orbital nodal network graph, interaction weights, and 24-hour pattern-of-life activity heatmap.
+- **Feature 4: Deep IOC, Cryptocurrency & Malware Triage Scanner** (`packages/mmf_core/.../triage/analyzer.py`, `routes/forensics.py`, `TriagePage.tsx`):
+  - Scans for Bitcoin/Ethereum/Monero wallets, Luhn-verified payment cards, private keys, darkweb `.onion` links, and high-risk keywords with one-click IOC copy.
+- **Feature 5: Official PDF Forensic Case Report** (`packages/mmf_core/.../reporting/generator.py`, `routes/reports.py`, `ReportsPage.tsx`):
+  - High-resolution court-ready PDF dossier compiled via WeasyPrint with A4 pagination, cryptographic seals, and signature blocks.
+- **Feature 6: Next-Gen Social App Parsers** (`packages/mmf_core/.../parsers/`):
+  - Facebook Messenger (`threads_db2`), IMO (`imofriends.db`), Instagram Direct (`direct_v2.db`), Discord (`messages.db`), and Android User Dictionary (`user_dict.db`).
+  - Total automated regression tests: **41/41 passing (100%)**.
 
 ---
 

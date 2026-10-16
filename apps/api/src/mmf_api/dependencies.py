@@ -21,6 +21,12 @@ from mmf_core.parsers.ios.plist import IosPlistParser
 from mmf_core.parsers.ios.sms import IosSmsParser
 from mmf_core.parsers.ios.callhistory import IosCallHistoryParser
 from mmf_core.parsers.ios.safari import IosSafariParser
+from mmf_core.parsers.media.exif import ExifGpsParser
+from mmf_core.parsers.apps.messenger import MessengerParser
+from mmf_core.parsers.apps.imo import ImoParser
+from mmf_core.parsers.apps.instagram import InstagramDirectParser
+from mmf_core.parsers.apps.discord import DiscordParser
+from mmf_core.parsers.android.clipboard import AndroidDictionaryParser
 from mmf_core.acquisition.android.adb import AndroidAdbAdapter
 from mmf_core.security.protection import validate_session_token
 
@@ -37,13 +43,19 @@ parser_registry.register(ChromeHistoryParser())
 parser_registry.register(AndroidWifiParser())
 parser_registry.register(AndroidBluetoothParser())
 parser_registry.register(AndroidPackagesParser())
+parser_registry.register(AndroidDictionaryParser())
 parser_registry.register(WhatsAppParser())
 parser_registry.register(TelegramParser())
 parser_registry.register(SignalParser())
+parser_registry.register(MessengerParser())
+parser_registry.register(ImoParser())
+parser_registry.register(InstagramDirectParser())
+parser_registry.register(DiscordParser())
 parser_registry.register(IosPlistParser())
 parser_registry.register(IosSmsParser())
 parser_registry.register(IosCallHistoryParser())
 parser_registry.register(IosSafariParser())
+parser_registry.register(ExifGpsParser())
 
 # Acquisition adapters
 adb_adapter = AndroidAdbAdapter(output_dir=case_manager.base_data_dir / "acquisitions")

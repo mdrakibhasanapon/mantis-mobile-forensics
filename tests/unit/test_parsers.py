@@ -276,3 +276,218 @@ def test_ios_safari_parser():
         assert artifacts[0].normalized_data["title"] == "Developer GitHub Profile"
         assert artifacts[0].normalized_data["visit_count"] == 42
 
+def test_messenger_parser():
+    from mmf_core.parsers.apps.messenger import MessengerParser
+    with tempfile.TemporaryDirectory() as td:
+        db_path = Path(td) / "threads_db2"
+        with sqlite3.connect(db_path) as conn:
+            conn.execute("""
+            CREATE TABLE messages (
+                msg_id TEXT PRIMARY KEY,
+                thread_key TEXT,
+                text TEXT,
+                sender TEXT,
+                timestamp_ms INTEGER,
+                attachments TEXT
+            );
+            """)
+            conn.execute("INSERT INTO messages VALUES ('m1', 't1', 'Messenger forensic message', 'Suspect_Alice', 1672538000000, '[]');")
+
+        parser = MessengerParser()
+        assert parser.can_parse(db_path)
+        artifacts, timeline = parser.parse(db_path, "ev_test", "case_test")
+        assert len(artifacts) == 1
+        assert len(timeline) == 1
+        assert artifacts[0].normalized_data["text"] == "Messenger forensic message"
+        assert artifacts[0].normalized_data["sender"] == "Suspect_Alice"
+
+def test_imo_parser():
+    from mmf_core.parsers.apps.imo import ImoParser
+    with tempfile.TemporaryDirectory() as td:
+        db_path = Path(td) / "imofriends.db"
+        with sqlite3.connect(db_path) as conn:
+            conn.execute("CREATE TABLE friends (buid TEXT PRIMARY KEY, alias TEXT, name TEXT, phone TEXT);")
+            conn.execute("CREATE TABLE chat_messages (buid TEXT, message TEXT, timestamp INTEGER);")
+            conn.execute("INSERT INTO friends VALUES ('b1', 'ImoFriend', 'Bob', '+8801700000000');")
+            conn.execute("INSERT INTO chat_messages VALUES ('b1', 'Hello from IMO', 1672538000000);")
+
+        parser = ImoParser()
+        assert parser.can_parse(db_path)
+        artifacts, timeline = parser.parse(db_path, "ev_test", "case_test")
+        assert len(artifacts) == 2
+        assert any(a.category == "contacts" and a.normalized_data["phone_number"] == "+8801700000000" for a in artifacts)
+        assert any(a.category == "messages" and a.normalized_data["text"] == "Hello from IMO" for a in artifacts)
+
+def test_instagram_parser():
+    from mmf_core.parsers.apps.instagram import InstagramDirectParser
+    with tempfile.TemporaryDirectory() as td:
+        db_path = Path(td) / "direct_v2.db"
+        with sqlite3.connect(db_path) as conn:
+            conn.execute("""
+            CREATE TABLE messages (
+                message_id TEXT PRIMARY KEY,
+                thread_id TEXT,
+                user_id TEXT,
+                text TEXT,
+                timestamp INTEGER,
+                message_type TEXT
+            );
+            """)
+            conn.execute("INSERT INTO messages VALUES ('ig1', 't100', 'user_cyber', 'Secret Instagram DM', 1672538000000000, 'text');")
+
+        parser = InstagramDirectParser()
+        assert parser.can_parse(db_path)
+        artifacts, timeline = parser.parse(db_path, "ev_test", "case_test")
+        assert len(artifacts) == 1
+        assert artifacts[0].normalized_data["text"] == "Secret Instagram DM"
+        assert artifacts[0].normalized_data["user_id"] == "user_cyber"
+
+def test_discord_parser():
+    from mmf_core.parsers.apps.discord import DiscordParser
+    with tempfile.TemporaryDirectory() as td:
+        disc_dir = Path(td) / "discord_cache"
+        disc_dir.mkdir()
+        db_path = disc_dir / "messages.db"
+        with sqlite3.connect(db_path) as conn:
+            conn.execute("""
+            CREATE TABLE messages (
+                id TEXT PRIMARY KEY,
+                channel_id TEXT,
+                author_username TEXT,
+                content TEXT,
+                timestamp INTEGER
+            );
+            """)
+            conn.execute("INSERT INTO messages VALUES ('d1', 'c1', 'DarkOperator', 'Discord operational payload', 1672538000000);")
+
+        parser = DiscordParser()
+        assert parser.can_parse(db_path)
+        artifacts, timeline = parser.parse(db_path, "ev_test", "case_test")
+        assert len(artifacts) == 1
+        assert artifacts[0].normalized_data["author"] == "DarkOperator"
+        assert artifacts[0].normalized_data["content"] == "Discord operational payload"
+
+def test_android_dictionary_parser():
+    from mmf_core.parsers.android.clipboard import AndroidDictionaryParser
+    with tempfile.TemporaryDirectory() as td:
+        db_path = Path(td) / "user_dict.db"
+        with sqlite3.connect(db_path) as conn:
+            conn.execute("CREATE TABLE words (word TEXT, frequency INTEGER, locale TEXT, appid TEXT);")
+            conn.execute("INSERT INTO words VALUES ('cryptopass123', 250, 'en_US', 'gboard');")
+
+        parser = AndroidDictionaryParser()
+        assert parser.can_parse(db_path)
+        artifacts, timeline = parser.parse(db_path, "ev_test", "case_test")
+        assert len(artifacts) == 1
+        assert artifacts[0].normalized_data["word"] == "cryptopass123"
+        assert artifacts[0].normalized_data["frequency"] == 250
+
+def test_exif_gps_parser():
+    from mmf_core.parsers.media.exif import ExifGpsParser
+    from PIL import Image
+    from fractions import Fraction
+    with tempfile.TemporaryDirectory() as td:
+        img_path = Path(td) / "evidence.jpg"
+        img = Image.new("RGB", (50, 50), color=(10, 20, 30))
+        exif = img.getexif()
+        exif[271] = "Apple"
+        exif[272] = "iPhone 14 Pro"
+        gps_ifd = exif.get_ifd(0x8825)
+        gps_ifd[1] = "N"
+        gps_ifd[2] = (Fraction(23, 1), Fraction(48, 1), Fraction(37, 1))
+        gps_ifd[3] = "E"
+        gps_ifd[4] = (Fraction(90, 1), Fraction(24, 1), Fraction(45, 1))
+        img.save(img_path, exif=exif)
+
+        parser = ExifGpsParser()
+        assert parser.can_parse(img_path)
+        artifacts, timeline = parser.parse(img_path, "ev_test", "case_test")
+        assert len(artifacts) == 1
+        assert artifacts[0].normalized_data["has_gps"] is True
+        assert artifacts[0].normalized_data["camera_make"] == "Apple"
+        assert round(artifacts[0].normalized_data["latitude"], 2) == 23.81
+        assert round(artifacts[0].normalized_data["longitude"], 2) == 90.41
+
+def test_deep_triage_scanner():
+    from mmf_core.triage.analyzer import TriageAnalyzer
+    from mmf_core.models import Artifact, RecoveryStatus
+    import uuid
+
+    arts = [
+        Artifact(
+            id=str(uuid.uuid4()),
+            case_id="case_1",
+            evidence_id="ev_1",
+            platform="android",
+            category="messages",
+            source_file="msg.db",
+            parser_id="test",
+            normalized_data={"text": "Send ransom to bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh right now"}
+        ),
+        Artifact(
+            id=str(uuid.uuid4()),
+            case_id="case_1",
+            evidence_id="ev_1",
+            platform="android",
+            category="browser",
+            source_file="hist.db",
+            parser_id="test",
+            normalized_data={"url": "http://darknetvault5h3j4k.onion/market"}
+        ),
+        Artifact(
+            id=str(uuid.uuid4()),
+            case_id="case_1",
+            evidence_id="ev_1",
+            platform="android",
+            category="messages",
+            source_file="msg.db",
+            parser_id="test",
+            normalized_data={"text": "Card detail: 4532 0150 1234 5671"}
+        )
+    ]
+
+    findings = TriageAnalyzer.scan_artifacts("case_1", arts)
+    categories = [f.category for f in findings]
+    assert "cryptocurrency" in categories
+    assert "suspicious_url" in categories
+    assert "financial_card" in categories
+
+def test_communication_link_analysis():
+    from mmf_core.correlation.engine import CorrelationEngine
+    from mmf_core.models import Artifact
+    import uuid
+
+    arts = [
+        Artifact(
+            id=str(uuid.uuid4()),
+            case_id="c1",
+            evidence_id="e1",
+            platform="android",
+            category="calls",
+            subcategory="calls",
+            timestamp_utc="2025-06-20T14:30:00Z",
+            source_file="calls.db",
+            parser_id="test",
+            normalized_data={"sender_or_recipient": "+15551234567"}
+        ),
+        Artifact(
+            id=str(uuid.uuid4()),
+            case_id="c1",
+            evidence_id="e1",
+            platform="android",
+            category="messages",
+            subcategory="whatsapp",
+            timestamp_utc="2025-06-20T15:00:00Z",
+            source_file="msgstore.db",
+            parser_id="test",
+            normalized_data={"sender_or_recipient": "+15551234567", "text": "Are you ready?"}
+        )
+    ]
+
+    graph = CorrelationEngine.build_communication_graph("c1", arts)
+    assert graph["metrics"]["total_interactions"] == 2
+    assert len(graph["nodes"]) >= 2
+    assert any(n["id"] == "+15551234567" for n in graph["nodes"])
+    assert "whatsapp" in graph["metrics"]["channel_distribution"]
+
+

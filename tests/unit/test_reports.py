@@ -104,3 +104,54 @@ def test_export_timeline_csv():
         content = res_path.read_text(encoding="utf-8")
         assert "timestamp_utc,event_type,title" in content.lower()
         assert "Incoming Call" in content
+
+def test_generate_pdf_report():
+    with tempfile.TemporaryDirectory() as td:
+        out_pdf = Path(td) / "test_report.pdf"
+        case_data = {
+            "case": {
+                "case_number": "CASE-PDF-001",
+                "title": "Operation PDF Export",
+                "investigator": "Special Agent DFIR",
+                "agency": "Cyber Forensics Unit",
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "status": "active"
+            },
+            "statistics": {
+                "total_bytes": 2048,
+                "evidence_count": 1,
+                "artifacts_count": 2,
+                "triage_findings_count": 0,
+                "recovered_items_count": 0,
+                "contacts_count": 1,
+                "calls_count": 0,
+                "messages_count": 1,
+                "browser_count": 0,
+                "installed_apps_count": 0
+            },
+            "evidence": [
+                {
+                    "id": "ev_001",
+                    "name": "target_device.zip",
+                    "source_type": "archive",
+                    "file_size": 2048,
+                    "sha256": "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+                    "verification_status": "match"
+                }
+            ],
+            "audit_verification": {"valid": True, "records_count": 3},
+            "artifacts": [],
+            "timeline": [],
+            "correlations": [],
+            "triage": [],
+            "recovered": []
+        }
+
+        res_path = ForensicReportGenerator.generate_pdf_report(case_data, out_pdf)
+        assert res_path.exists()
+        assert res_path.stat().st_size > 1000
+        # Check PDF magic bytes (%PDF)
+        with open(res_path, "rb") as f:
+            header = f.read(4)
+            assert header == b"%PDF"
+

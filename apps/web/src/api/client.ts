@@ -71,6 +71,12 @@ export const api = {
 
   // Devices & Acquisition
   getDeviceStatus: () => request<any>('/devices/status'),
+  getDeviceDetails: (serial: string) => request<any>(`/devices/${encodeURIComponent(serial)}/details`),
+  acquireLiveDevice: (serial: string, caseId: string, mode = 'quick') =>
+    request<any>(`/devices/${encodeURIComponent(serial)}/acquire`, {
+      method: 'POST',
+      body: JSON.stringify({ case_id: caseId, mode }),
+    }),
   generateSynthetic: (caseId: string, deviceName?: string) =>
     request<{ status: string; job_id: string }>('/evidence/generate-synthetic', {
       method: 'POST',
@@ -117,9 +123,12 @@ export const api = {
   exportTimelineCsvUrl: (caseId: string) =>
     `${cachedBaseUrl}/timeline/export-csv?case_id=${caseId}${cachedToken ? `&token=${encodeURIComponent(cachedToken)}` : ''}`,
 
-  // Forensics: Correlations, Triage, Recovery, SQLite
+  // Forensics: Correlations, Triage, Recovery, SQLite, Locations, Link Analysis
   getCorrelations: (caseId: string) => request<CorrelationLink[]>(`/forensics/correlations?case_id=${caseId}`),
+  getLinkAnalysis: (caseId: string) => request<any>(`/forensics/link-analysis?case_id=${caseId}`),
+  getLocations: (caseId: string) => request<{ case_id: string; total_locations: number; locations: any[] }>(`/forensics/locations?case_id=${caseId}`),
   getTriageFindings: (caseId: string) => request<TriageFinding[]>(`/forensics/triage?case_id=${caseId}`),
+  runDeepTriageScan: (caseId: string) => request<any>(`/forensics/triage/scan?case_id=${caseId}`, { method: 'POST' }),
   getRecoveredItems: (caseId: string) => request<RecoveredItem[]>(`/forensics/recovered?case_id=${caseId}`),
   listSqliteDatabases: (caseId: string) => request<any[]>(`/forensics/sqlite/databases?case_id=${caseId}`),
   getSqliteSchema: (caseId: string, relativeDbPath: string) =>
@@ -136,6 +145,9 @@ export const api = {
   generateHtmlReport: (caseId: string) => request<any>(`/reports/generate-html?case_id=${caseId}`, { method: 'POST' }),
   getViewHtmlReportUrl: (caseId: string) =>
     `${cachedBaseUrl}/reports/view-html?case_id=${caseId}${cachedToken ? `&token=${encodeURIComponent(cachedToken)}` : ''}`,
+  generatePdfReport: (caseId: string) => request<any>(`/reports/generate-pdf?case_id=${caseId}`, { method: 'POST' }),
+  getDownloadPdfUrl: (caseId: string) =>
+    `${cachedBaseUrl}/reports/download-pdf?case_id=${caseId}${cachedToken ? `&token=${encodeURIComponent(cachedToken)}` : ''}`,
 
   // Background Jobs
   listJobs: (caseId?: string) => request<BackgroundJob[]>(`/jobs${caseId ? `?case_id=${caseId}` : ''}`),

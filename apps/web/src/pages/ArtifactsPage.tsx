@@ -39,6 +39,7 @@ export const ArtifactsPage: React.FC<ArtifactsPageProps> = ({
     { id: 'calls', label: 'Call Logs' },
     { id: 'contacts', label: 'Contacts' },
     { id: 'wireless', label: 'Wireless (Wi-Fi / BT)' },
+    { id: 'locations', label: 'Locations & EXIF' },
     { id: 'browser', label: 'Browser History' },
     { id: 'installed_apps', label: 'Installed Apps' },
   ];
