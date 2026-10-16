@@ -83,18 +83,18 @@ mantis-mobile-forensics/
 Simply paste this single command in terminal and press Enter:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/mdrakibhasanapon/mantis-mobile-forensics/main/setup.sh | bash
+curl -sSL https://raw.githubusercontent.com/mdrakibhasanapon/mantis-mobile-forensics/main/install.sh | bash
 ```
 *This automatically clones the repository, installs all dependencies (Python, Node, Electron), builds the UI, and creates the Desktop and Application Menu shortcuts without any manual commands.*
 
 ---
 
-### 💻 Option 2: 1-Line Git Clone & Setup
+### 💻 Option 2: 1-Line Git Clone & Install
 ```bash
-git clone https://github.com/mdrakibhasanapon/mantis-mobile-forensics.git && cd mantis-mobile-forensics && ./setup.sh
+git clone https://github.com/mdrakibhasanapon/mantis-mobile-forensics.git && cd mantis-mobile-forensics && ./install.sh
 ```
 
-### What `./setup.sh` Does Automatically:
+### What `./install.sh` Does Automatically:
 1. **Installs System Packages**: Checks and ensures `python3`, `pip3`, `nodejs`, `npm`, `curl`, and `adb` are present.
 2. **Installs Python Dependencies**: Installs `fastapi`, `uvicorn`, `pydantic`, `pytest`, and forensic modules from `requirements.txt`.
 3. **Installs Web Packages & Builds UI**: Runs `npm install` and compiles the React/Tailwind production bundle (`apps/web/dist`).

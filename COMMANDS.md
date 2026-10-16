@@ -8,14 +8,13 @@ This guide explains how to upload this project to your GitHub, synchronize chang
 
 | Task | Command |
 | :--- | :--- |
-| **One-Shot Setup (New Laptop)** | `./setup.sh` |
+| **One-Shot Install (Dependencies + Desktop + Menu)** | `./install.sh` |
 | **Auto-Update from GitHub** | `./update.sh` |
 | **Check Updates (Dry-Run)** | `./update.sh --check-only` |
 | **Launch in Development Mode** | `./dev.sh` |
 | **Launch Desktop Workstation** | `mantis-forensics` |
 | **Run Regression Test Suite** | `./scripts/test.sh` |
 | **Build Debian Package (.deb)**| `./scripts/build_deb.sh` |
-| **Install / Re-link Desktop** | `./install.sh` |
 
 ---
 
@@ -63,8 +62,8 @@ git clone https://github.com/mdrakibhasanapon/mantis-mobile-forensics.git
 # Navigate into the project folder
 cd mantis-mobile-forensics
 
-# Run one-shot setup (installs all dependencies, builds UI, adds desktop & menu icons)
-./setup.sh
+# Run one-shot installer (installs all dependencies, builds UI, adds desktop & menu icons)
+./install.sh
 ```
 
 ### Step 2: Open in Antigravity
