@@ -45,10 +45,19 @@ for arg in "$@"; do
 done
 
 # If no mode specified, auto-detect:
-# If target brain doesn't exist on this machine -> RESTORE!
-# If target brain already exists -> BACKUP & SYNC!
+# If there are active conversation directories on this machine -> BACKUP!
+# If no conversations exist on this machine yet -> RESTORE!
 if [ -z "$MODE" ]; then
-    if [ -d "$TARGET_BRAIN_DIR" ]; then
+    HAS_LOCAL_CHATS=0
+    if [ -d "$BRAIN_BASE_DIR" ]; then
+        for d in "$BRAIN_BASE_DIR"/*; do
+            if [ -d "$d" ] && [ "$(basename "$d")" != "tempmediaStorage" ]; then
+                HAS_LOCAL_CHATS=1
+                break
+            fi
+        done
+    fi
+    if [ "$HAS_LOCAL_CHATS" -eq 1 ]; then
         MODE="backup"
     else
         MODE="restore"
