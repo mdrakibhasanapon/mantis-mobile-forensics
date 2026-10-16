@@ -164,17 +164,21 @@ export const SqliteExplorerPage: React.FC<SqliteExplorerPageProps> = ({ caseId }
       <div className="p-3 bg-[#10151f] border-b border-[#1c2738] flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
         <div className="flex items-center space-x-2">
           <Database size={15} className="text-cyan-400" />
-          <span className="font-sans font-semibold text-slate-400">Database:</span>
+          <span className="font-sans font-semibold text-slate-300">Database:</span>
           <select
             value={selectedDb}
             onChange={(e) => setSelectedDb(e.target.value)}
-            className="bg-[#172232] border border-[#24344a] rounded px-2.5 py-1 text-slate-200 text-xs focus:outline-none focus:border-cyan-500"
+            className="bg-[#172232] border border-[#24344a] rounded-md px-3 py-1.5 text-slate-200 text-xs font-mono min-w-[280px] sm:min-w-[340px] max-w-lg truncate focus:outline-none focus:border-cyan-500 cursor-pointer shadow-sm hover:border-[#354964]"
           >
-            {databases.map((db, i) => (
-              <option key={i} value={db.relative_path}>
-                {db.name} ({(db.file_size / 1024).toFixed(1)} KB)
-              </option>
-            ))}
+            {databases.length === 0 ? (
+              <option value="" disabled>-- No databases detected in evidence --</option>
+            ) : (
+              databases.map((db, i) => (
+                <option key={i} value={db.relative_path}>
+                  🗄️ {db.name} ({(db.file_size / 1024).toFixed(1)} KB)
+                </option>
+              ))
+            )}
           </select>
         </div>
 

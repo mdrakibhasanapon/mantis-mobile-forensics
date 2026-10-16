@@ -403,27 +403,37 @@ export const EvidenceExplorerPage: React.FC<EvidenceExplorerPageProps> = ({
   return (
     <div className="flex-1 flex flex-col h-full bg-[#0c0f14] overflow-hidden select-none">
       {/* Top Evidence Selector Bar */}
-      <div className="h-12 bg-[#101621] border-b border-[#1c2738] px-4 flex items-center justify-between text-xs font-mono flex-shrink-0">
-        <div className="flex items-center space-x-3">
-          <span className="text-slate-400 font-sans font-semibold">Evidence Vault:</span>
+      <div className="min-h-[52px] py-2 bg-[#101621] border-b border-[#1c2738] px-4 flex flex-wrap items-center justify-between gap-3 text-xs font-mono flex-shrink-0">
+        <div className="flex items-center space-x-3 flex-wrap gap-y-2">
+          <div className="flex items-center space-x-1.5 text-slate-300 font-sans font-semibold text-xs whitespace-nowrap">
+            <Database size={14} className="text-cyan-400" />
+            <span>Evidence Vault:</span>
+          </div>
+
           <select
             value={selectedEvidenceId}
             onChange={(e) => setSelectedEvidenceId(e.target.value)}
-            className="bg-[#182333] border border-[#25364d] rounded px-2.5 py-1 text-slate-200 text-xs focus:outline-none focus:border-cyan-500"
+            className="bg-[#182333] border border-[#25364d] rounded-md px-3 py-1.5 text-slate-200 text-xs font-mono focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 shadow-sm w-72 sm:w-80 md:w-96 lg:w-[420px] max-w-full truncate cursor-pointer transition-colors hover:border-[#354964]"
           >
-            {evidenceList.map((e) => (
-              <option key={e.id} value={e.id}>
-                {e.name} ({e.source_type}) - {(e.file_size / (1024 * 1024)).toFixed(1)} MB
+            {evidenceList.length === 0 ? (
+              <option value="" disabled>
+                -- No Evidence Vault Loaded (Click Select & Import File) --
               </option>
-            ))}
+            ) : (
+              evidenceList.map((e) => (
+                <option key={e.id} value={e.id} className="bg-[#141c29] text-slate-200 py-1">
+                  📁 {e.name} ({e.source_type.toUpperCase()}) — {(e.file_size / (1024 * 1024)).toFixed(1)} MB
+                </option>
+              ))
+            )}
           </select>
 
           <button
             onClick={handleSelectEvidenceFile}
-            className="px-2.5 py-1 rounded bg-[#162030] border border-cyan-500/40 text-cyan-300 hover:bg-cyan-600/30 transition-colors flex items-center space-x-1.5"
+            className="px-3 py-1.5 rounded-md bg-[#162030] border border-cyan-500/50 text-cyan-300 hover:bg-cyan-600/25 hover:text-cyan-200 transition-colors flex items-center space-x-1.5 font-sans font-medium text-xs shadow-sm whitespace-nowrap"
             title="Browse and select a forensic evidence file or archive to import into this case"
           >
-            <FolderUp size={13} />
+            <FolderUp size={14} className="text-cyan-400" />
             <span>Select & Import File...</span>
           </button>
         </div>
